@@ -2,6 +2,7 @@ import dbConnect from "@/utils/dbconnect";
 import Product from "@/models/product";
 import { NextResponse } from "next/server";
 import { v2 as cloudinary } from "cloudinary";
+import mongoose from "mongoose";
 
 cloudinary.config({
   cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
@@ -73,35 +74,64 @@ export async function POST(request) {
 }
 
 
-//Get all products with Filters
-export  async function GET(request){
-    try{
-        await dbConnect();
-        
-        const { searchParams } = new URL(request.url);
-        console.log(searchParams)
-        const category = searchParams.get("category")
-        const industry = searchParams.get("industry")
-        const minPrice = parseFloat(searchParams.get("minPrice")) || 0;
-        const maxPrice = parseFloat(searchParams.get("maxPrice")) || Infinity;
 
+export async function GET(request) {
+  try {
+    await dbConnect();
 
-        //MongoDb filter
-        const filter ={
-            price:{ $gte: minPrice , $lte: maxPrice},
-        };
-        if (category) filter.category = category;
-        if (industry) filter.industry = industry;
-        
-      
-       
-        const products = await Product.find(filter).sort({createdAt: -1})
-        return NextResponse.json({success: true , products});
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id"); // 👈 Look for id in query params
+    const category = searchParams.get("category");
+    const industry = searchParams.get("industry");
+    const minPrice = parseFloat(searchParams.get("minPrice")) || 0;
+    const maxPrice = parseFloat(searchParams.get("maxPrice")) || Infinity;
 
+    // If ID is provided → Get single product
+    if (id) {
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        return NextResponse.json(
+          { error: "Invalid product ID" },
+          { status: 400 }
+        );
+      }
 
+      const product = await Product.findById(id)
+        .populate("category")
+        .populate("industry");
 
-    }catch (error){
-        console.error(error);
-        return NextResponse.json({error: "Failed to Fetch products"},{status: 500});
+      if (!product) {
+        return NextResponse.json(
+          { error: "Product not found" },
+          { status: 404 }
+        );
+      }
+
+      return NextResponse.json({ success: true, product }, { status: 200 });
     }
+
+    // Otherwise → Get all products with filters
+    const filter = {
+      price: { $gte: minPrice, $lte: maxPrice },
+    };
+
+    if (category && mongoose.Types.ObjectId.isValid(category)) {
+      filter.category = new mongoose.Types.ObjectId(category);
+    }
+
+    if (industry && mongoose.Types.ObjectId.isValid(industry)) {
+      filter.industry = new mongoose.Types.ObjectId(industry);
+    }
+
+    const products = await Product.find(filter)
+      .populate("category")
+      .populate("industry");
+
+    return NextResponse.json({ success: true, products });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json(
+      { error: "Failed to Fetch products" },
+      { status: 500 }
+    );
+  }
 }
