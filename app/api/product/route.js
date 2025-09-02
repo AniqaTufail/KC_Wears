@@ -80,7 +80,7 @@ export async function GET(request) {
     await dbConnect();
 
     const { searchParams } = new URL(request.url);
-    const id = searchParams.get("id"); // 👈 Look for id in query params
+    const id = searchParams.get("id"); 
     const category = searchParams.get("category");
     const industry = searchParams.get("industry");
     const minPrice = parseFloat(searchParams.get("minPrice")) || 0;
@@ -134,4 +134,86 @@ export async function GET(request) {
       { status: 500 }
     );
   }
+}
+
+
+export async function PATCH(request) {
+  try {
+    await dbConnect();
+
+    const body = await request.json();
+    const { id, ...updateData } = body;
+
+    // Validate ID
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json(
+        { error: "Invalid or missing product ID" },
+        { status: 400 }
+      );
+    }
+
+    // Convert category & industry to ObjectId if provided
+    if (updateData.category && mongoose.Types.ObjectId.isValid(updateData.category)) {
+      updateData.category = new mongoose.Types.ObjectId(updateData.category);
+    }
+    if (updateData.industry && mongoose.Types.ObjectId.isValid(updateData.industry)) {
+      updateData.industry = new mongoose.Types.ObjectId(updateData.industry);
+    }
+
+    // Find and update the product
+    const updatedProduct = await Product.findByIdAndUpdate(id, updateData, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!updatedProduct) {
+      return NextResponse.json(
+        { error: "Product not found" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(
+      { success: true, product: updatedProduct },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json(
+      { error: "Failed to update product" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(request){
+  try{
+    await dbConnect();
+    const { id } = await request.json();
+
+    if (!mongoose.Types.ObjectId.isValid(id)){
+      return NextResponse.json(
+        {error: "Invalid Product ID"},
+        {status : 400}
+      );}
+      const product = await Product.findById(id);
+
+      if (!product){
+           return NextResponse.json(
+          {error: "Product Not Found"},
+          {status : 404}
+        );
+      }
+      await Product.findByIdAndDelete(id);
+      return NextResponse.json(
+        {success: true , message: "Product Deleted Succesfully"},
+        {status: 200}
+      );
+}catch(error){
+  console.error(error);
+  return NextResponse.json(
+    {error: "Failed to delete product"},
+    {status: 500}
+  );
+}
 }
