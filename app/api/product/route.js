@@ -34,7 +34,7 @@ export async function POST(request) {
       return NextResponse.json({ error: "No Images Found" }, { status: 400 });
     }
 
-    const imageUrls = [];
+    const uploadedImages = [];
 
     // Upload all images to Cloudinary
     for (const file of files) {
@@ -46,7 +46,10 @@ export async function POST(request) {
         folder: "products"
       });
 
-      imageUrls.push(result.secure_url);
+      uploadedImages.push({
+        url: result.secure_url,
+        public_id: result.public_id,
+      });
     }
 
     // Create product in MongoDB
@@ -58,8 +61,8 @@ export async function POST(request) {
       discountprice, 
       colors,
       sizes,
-      thumbnailurl: imageUrls[0], 
-      images: imageUrls,
+      thumbnailurl: uploadedImages[0].url, 
+      images: uploadedImages,
       category,
       industry,
       stock
@@ -67,7 +70,7 @@ export async function POST(request) {
 
     return NextResponse.json({ success: true, product: newProduct });
 
-  } catch (error) {
+  }catch (error) {
     console.error(error);
     return NextResponse.json({ error: "Upload or Save Failure" }, { status: 500 });
   }
@@ -205,6 +208,14 @@ export async function DELETE(request){
         );
       }
       await Product.findByIdAndDelete(id);
+      if (product.images && product.images.length > 0) {
+      for (const image of product.images) {
+        if (image.public_id) {
+          await cloudinary.uploader.destroy(image.public_id);
+        }
+      }
+    }
+
       return NextResponse.json(
         {success: true , message: "Product Deleted Succesfully"},
         {status: 200}

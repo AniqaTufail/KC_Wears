@@ -18,7 +18,7 @@ const productSchema = new mongoose.Schema(
 
        thumbnailurl : { type : String , required : true},
 
-       images : { type : [String] , required : true },
+        images: [{url: String, public_id: String}],
 
        category : { type : mongoose.Schema.Types.ObjectId, required : true },
 
