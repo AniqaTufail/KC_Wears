@@ -9,10 +9,10 @@ const Navbar = () => {
 
   return (
     <div className="z-20 absolute top-0 left-0 w-full px-20 mt-10">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between ">
         
         
-        <div className="h-25 w-25 flex items-center">
+        <div className="h-25 w-25  ">
           <Image
             src="/logo.png"
             alt="KC Wears collection"

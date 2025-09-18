@@ -1,24 +1,27 @@
-import React from "react";
+"use client";
+import React, { useState } from "react";
+import { ReactTyped } from "react-typed";
 import Link from "next/link";
-import Image from "next/image"
 
 const HeroSection = () => {
+  const [typingDone, setTypingDone] = useState(false);
+
   return (
-    <div className=""> 
-    <div className= "relative h-screen w-screen"> 
-        <Image
-          src="/herosection.jpg" 
-          alt="KC Wears collection"
-          className="object-cover"
-          fill
-          
-        />
-        </div>
+    <div className="relative h-screen w-screen flex flex-col justify-center items-center text-center">
     
+      <div className="absolute inset-0">
+        <img
+          src="/herosection.png"
+          alt="KC Wears Hero"
+          className="w-full h-full object-cover brightness-90"
+        />
+        
+
+      
+
     </div>
-
-
-
+    </div>
   );
 };
-export default  HeroSection
+
+export default HeroSection;
