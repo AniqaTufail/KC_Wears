@@ -1,6 +1,6 @@
-import HeroSection from "./components/herosection";
+import HeroCarousel from "./components/herosection";
 import Navbar from "./components/navbar";
-
+import About from "./components/about";
 
 export default function Home() {
   return (
@@ -8,7 +8,8 @@ export default function Home() {
     <>
       
       <Navbar/>
-      <HeroSection/>
+      <HeroCarousel/>
+      <About/>
      
       
     </>

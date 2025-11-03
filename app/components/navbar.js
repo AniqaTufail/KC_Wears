@@ -8,11 +8,11 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
-    <div className="z-20 absolute top-0 left-0 w-full px-20 mt-10">
+    <div className="z-20 absolute top-0 left-0 w-full  ">
       <div className="flex justify-between ">
         
         
-        <div className="h-25 w-25  ">
+        <div className="h-auto w-10 sm-15 md:w-20 ">
           <Image
             src="/logo.png"
             alt="KC Wears collection"
@@ -24,7 +24,7 @@ const Navbar = () => {
         </div>
 
         {/* Desktop Menu */}
-        <div className="hidden md:flex space-x-12 text-amber-50 font-medium">
+        <div className="hidden md:flex space-x-12 text-white font-medium">
           <Link href="#">About</Link>
           <Link href="#">Shop by Categories</Link>
           <Link href="#">Shop by Industries</Link>
@@ -35,9 +35,9 @@ const Navbar = () => {
         <div className="md:hidden">
           <button onClick={() => setIsOpen(!isOpen)}>
             {isOpen ? (
-              <X className="h-8 w-8 text-white" />  // mobile size
+              <X className="h-5 w-5 text-white" />  // mobile size
             ) : (
-              <Menu className="h-8 w-8 text-white" /> // mobile size
+              <Menu className="h-5 w-5 text-white" /> // mobile size
             )}
           </button>
         </div>
